@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../components/header';
-import Footers from '../components/footers';
-import { Button, Label, Radio, Select } from 'flowbite-react';
-import { AiOutlineLoading } from 'react-icons/ai';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { FiPlus, FiMinus, FiVideo, FiImage, FiGlobe, FiLoader } from 'react-icons/fi';
+
+import Header from '../components/header';
+import Footers from '../components/footers';
 import { serverURL } from '../constants';
 
 const Create = () => {
-
     const maxSubtopics = 5;
     const [formValues, setFormValues] = useState([{ sub: "" }]);
     const [processing, setProcessing] = useState(false);
@@ -61,36 +61,71 @@ const Create = () => {
         { "code": "vi", "name": "Vietnamese" }
     ];
 
-    useEffect(() => {
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  };
 
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const formControlVariants = {
+    hidden: { scale: 0.95, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    exit: { 
+      scale: 0.95, 
+      opacity: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+    useEffect(() => {
         if (sessionStorage.getItem('type') !== 'free') {
             setPaidMember(true);
-            setLableText('Select number of sub topics')
+      setLableText('Select number of sub topics');
         }
-
     }, []);
 
-    let handleChange = (i, e) => {
+  const handleChange = (i, e) => {
         let newFormValues = [...formValues];
         newFormValues[i][e.target.name] = e.target.value;
         setFormValues(newFormValues);
-    }
+  };
 
-    let addFormFields = () => {
+  const addFormFields = () => {
         if (formValues.length < maxSubtopics) {
             setFormValues([...formValues, { sub: "" }]);
         } else {
             showToast('You can only add 5 sub topics');
         }
-    }
+  };
 
-    let removeFormFields = () => {
+  const removeFormFields = () => {
+    if (formValues.length > 1) {
         let newFormValues = [...formValues];
         newFormValues.pop();
         setFormValues(newFormValues);
     }
+  };
 
-    const showPaidToast = async () => {
+  const showPaidToast = () => {
         if (!paidMember) {
             toast("For paid members only", {
                 position: "bottom-center",
@@ -102,9 +137,9 @@ const Create = () => {
                 progress: undefined
             });
         }
-    }
+  };
 
-    const showToast = async (msg) => {
+  const showToast = (msg) => {
         toast(msg, {
             position: "bottom-center",
             autoClose: 3000,
@@ -114,27 +149,32 @@ const Create = () => {
             draggable: true,
             progress: undefined
         });
-    }
+  };
 
     const handleSubmit = (event) => {
         event.preventDefault();
         const subtopics = [];
         setProcessing(true);
-        formValues.forEach(subtopic => {
-            subtopics.push(subtopic.subtopic);
+    
+    // Extract subtopics from form
+    const subtopicElements = document.querySelectorAll('input[id="subtopic"]');
+    subtopicElements.forEach(element => {
+      if (element.value.trim()) {
+        subtopics.push(element.value.trim());
+      }
         });
 
         const mainTopic = document.getElementById('topic1').value;
 
         if (!mainTopic.trim()) {
             setProcessing(false);
-            showToast('Please fill in all required fields');
+      showToast('Please enter a main topic');
             return;
         }
 
         if (subtopics.length === 0) {
             setProcessing(false);
-            showToast('Please fill in all required fields');
+      showToast('Please add at least one subtopic');
             return;
         }
 
@@ -181,8 +221,7 @@ const Create = () => {
       ]
       }`;
 
-        sendPrompt(prompt, mainTopic, selectedType)
-
+    sendPrompt(prompt, mainTopic, selectedType);
     };
 
     async function sendPrompt(prompt, mainTopic, selectedType) {
@@ -197,113 +236,266 @@ const Create = () => {
             try {
                 const parsedJson = JSON.parse(cleanedJsonString);
                 setProcessing(false);
-                navigate('/topics', { state: { jsonData: parsedJson, mainTopic: mainTopic.toLowerCase(), type: selectedType.toLowerCase(), lang } });
+        navigate('/topics', { 
+          state: { 
+            jsonData: parsedJson, 
+            mainTopic: mainTopic.toLowerCase(), 
+            type: selectedType.toLowerCase(), 
+            lang 
+          } 
+        });
             } catch (error) {
-                sendPrompt(prompt, mainTopic, selectedType)
+        sendPrompt(prompt, mainTopic, selectedType);
             }
-
         } catch (error) {
-            sendPrompt(prompt, mainTopic, selectedType)
-        }
+      sendPrompt(prompt, mainTopic, selectedType);
     }
-
-    const handleRadioChange = (event) => {
-        setSelectedValue(event.target.value);
-    };
-
-    const handleRadioChangeType = (event) => {
-        setSelectedType(event.target.value);
-    };
+  }
 
     return (
-        <div className='h-screen flex flex-col'>
+    <div className="min-h-screen flex flex-col">
             <Header isHome={true} className="sticky top-0 z-50" />
 
-            <div className='dark:bg-black flex-1'>
-
-                <div className='flex-1 flex items-center justify-center py-10'>
-
-                    <form onSubmit={handleSubmit} className="max-w-sm m-auto py-4 no-scrollbar">
-                        <p className='text-center font-black text-4xl text-black dark:text-white'>Generate Course</p>
-                        <p className='text-center font-normal text-black py-4 dark:text-white'>Type the topic on which you want to Generate course.<br />
-                            Also, you can enter a list of subtopics, which are the specifics you want to learn.</p>
-                        <div className='py-6'>
-                            <div className='mb-6'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="topic1" value="Topic" />
-                                </div>
-                                <input className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white' id="topic1" type="text" />
-                            </div>
-                            <div className='mb-6'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="subtopic" value="Sub Topic" />
-                                </div>
+      <main className="flex-1 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black">
+        <div className="container max-w-2xl mx-auto py-12 px-4">
+          <motion.div
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+          >
+            <div className="p-6 md:p-8">
+              <motion.div variants={itemVariants} className="text-center mb-8">
+                <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                  Create Your Course
+                </h1>
+                <p className="mt-3 text-gray-600 dark:text-gray-300">
+                  Enter your main topic and subtopics to generate a personalized learning experience
+                </p>
+              </motion.div>
+              
+              <form onSubmit={handleSubmit}>
+                <motion.div variants={itemVariants} className="mb-6">
+                  <label htmlFor="topic1" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Main Topic
+                  </label>
+                  <div className="relative">
+                    <input 
+                      id="topic1" 
+                      type="text" 
+                      placeholder="Enter the main subject (e.g. JavaScript, Machine Learning)"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </motion.div>
+                
+                <motion.div variants={itemVariants} className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Subtopics
+                  </label>
+                  <div className="space-y-3">
                                 {formValues.map((element, index) => (
-                                    <div key={index}>
-                                        <input onChange={e => handleChange(index, e)} className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white mb-6' id="subtopic" type="text" />
-                                    </div>
+                      <motion.div
+                        key={index}
+                        variants={formControlVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="relative"
+                      >
+                        <input
+                          id="subtopic"
+                          name="subtopic"
+                          type="text"
+                          placeholder={`Subtopic ${index + 1} (e.g. Loops, Functions)`}
+                          onChange={e => handleChange(index, e)}
+                          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </motion.div>
                                 ))}
                             </div>
-
-                            <Button type="button" onClick={() => addFormFields()} className='mb-6 items-center justify-center text-center dark:bg-white dark:text-black bg-black text-white font-bold rounded-none w-full enabled:hover:bg-black enabled:focus:bg-black enabled:focus:ring-transparent dark:enabled:hover:bg-white dark:enabled:focus:bg-white dark:enabled:focus:ring-transparent'>Add Sub-Topic</Button>
+                </motion.div>
+                
+                <motion.div variants={itemVariants} className="flex space-x-3 mb-6">
+                  <button
+                    type="button"
+                    onClick={addFormFields}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all"
+                  >
+                    <FiPlus />
+                    Add Subtopic
+                  </button>
 
                             {formValues.length > 1 && (
-                                <Button type="button" onClick={() => removeFormFields()} className='mb-6 items-center justify-center text-center border-black dark:border-white dark:bg-black dark:text-white bg-white text-black font-bold rounded-none w-full enabled:hover:bg-white enabled:focus:bg-white enabled:focus:ring-transparent dark:enabled:hover:bg-black dark:enabled:focus:bg-black dark:enabled:focus:ring-transparent'>Remove Sub-Topic</Button>
-                            )}
-
-                            <Label className="font-bold text-black dark:text-white" htmlFor="nosubtopic" value={lableText} />
-                            <fieldset className="flex max-w-md flex-col gap-4 mt-2">
-                                <div className="flex items-center gap-2 px-2 h-11 focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none w-full dark:bg-black dark:border-white dark:text-white">
-                                    <Radio onChange={handleRadioChange} className='text-black border-black dark:text-white dark:border-white dark:focus:text-black focus:ring-black dark:focus:ring-white dark:focus:bg-black ' id="4" name="value" value="4" defaultChecked />
-                                    <Label className='text-black dark:text-white font-bold' htmlFor="4">5</Label>
+                    <button
+                      type="button"
+                      onClick={removeFormFields}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-all"
+                    >
+                      <FiMinus />
+                      Remove
+                    </button>
+                  )}
+                </motion.div>
+                
+                <motion.div variants={itemVariants} className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {lableText}
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${selectedValue === '4' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700'}`}>
+                      <input
+                        type="radio"
+                        name="topicCount"
+                        value="4"
+                        checked={selectedValue === '4'}
+                        onChange={() => setSelectedValue('4')}
+                        className="text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      <span className="text-gray-800 dark:text-gray-100 font-medium">5 Topics</span>
+                    </label>
+                    
+                    <label 
+                      className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${!paidMember ? 'opacity-60' : ''} ${selectedValue === '7' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700'}`}
+                      onClick={!paidMember ? showPaidToast : undefined}
+                    >
+                      <input
+                        type="radio"
+                        name="topicCount"
+                        value="7"
+                        checked={selectedValue === '7'}
+                        onChange={() => setSelectedValue('7')}
+                        disabled={!paidMember}
+                        className="text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      <span className="text-gray-800 dark:text-gray-100 font-medium">10 Topics</span>
+                      {!paidMember && <span className="absolute right-2 top-2 text-xs bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">PRO</span>}
+                    </label>
                                 </div>
-                                <div onClick={() => showPaidToast()} className="flex items-center gap-2 px-2 h-11 focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none w-full dark:bg-black dark:border-white dark:text-white mb-6">
-                                    <Radio onChange={handleRadioChange} disabled={!paidMember} className='text-black border-black dark:text-white dark:border-white dark:focus:text-black focus:ring-black dark:focus:ring-white dark:focus:bg-black ' id="7" name="value" value="7" />
-                                    <Label className='text-black dark:text-white font-bold' htmlFor="7">10</Label>
+                </motion.div>
+                
+                <motion.div variants={itemVariants} className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Course Type
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${selectedType === 'Text & Image Course' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700'}`}>
+                      <input
+                        type="radio"
+                        name="courseType"
+                        value="Text & Image Course"
+                        checked={selectedType === 'Text & Image Course'}
+                        onChange={() => setSelectedType('Text & Image Course')}
+                        className="text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      <div className="flex items-center gap-2">
+                        <FiImage className="text-blue-600 dark:text-blue-400" />
+                        <span className="text-gray-800 dark:text-gray-100 font-medium">Theory & Images</span>
                                 </div>
-                            </fieldset>
-
-                            <Label className="font-bold text-black dark:text-white" htmlFor="nosubtopic" value="Select Course Type" />
-                            <fieldset className="flex max-w-md flex-col gap-4 mt-2">
-                                <div className="flex items-center gap-2 px-2 h-11 focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none w-full dark:bg-black dark:border-white dark:text-white">
-                                    <Radio onChange={handleRadioChangeType} className='text-black border-black dark:text-white dark:border-white dark:focus:text-black focus:ring-black dark:focus:ring-white dark:focus:bg-black ' id="textcourse" name="value1" value="Text & Image Course" defaultChecked />
-                                    <Label className='text-black dark:text-white font-bold' htmlFor="textcourse">Theory & Image Course</Label>
+                    </label>
+                    
+                    <label 
+                      className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer ${!paidMember ? 'opacity-60' : ''} ${selectedType === 'Video & Text Course' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700'}`}
+                      onClick={!paidMember ? showPaidToast : undefined}
+                    >
+                      <input
+                        type="radio"
+                        name="courseType"
+                        value="Video & Text Course"
+                        checked={selectedType === 'Video & Text Course'}
+                        onChange={() => setSelectedType('Video & Text Course')}
+                        disabled={!paidMember}
+                        className="text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      />
+                      <div className="flex items-center gap-2">
+                        <FiVideo className="text-blue-600 dark:text-blue-400" />
+                        <span className="text-gray-800 dark:text-gray-100 font-medium">Videos & Theory</span>
                                 </div>
-                                <div onClick={() => showPaidToast()} className="flex items-center gap-2 px-2 h-11 focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none w-full dark:bg-black dark:border-white dark:text-white mb-6">
-                                    <Radio onChange={handleRadioChangeType} disabled={!paidMember} className='text-black border-black dark:text-white dark:border-white dark:focus:text-black focus:ring-black dark:focus:ring-white dark:focus:bg-black ' id="videocourse" name="value1" value="Video & Text Course" />
-                                    <Label className='text-black dark:text-white font-bold' htmlFor="videocourse">Video & Theory Course</Label>
+                      {!paidMember && <span className="absolute right-2 top-2 text-xs bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">PRO</span>}
+                    </label>
                                 </div>
-                            </fieldset>
-
-                            <div className='mb-6'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="code1" value="Course Language" />
+                </motion.div>
+                
+                <motion.div variants={itemVariants} className="mb-8">
+                  <label htmlFor="language" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Course Language
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <FiGlobe className="text-gray-500 dark:text-gray-400" />
                                 </div>
-                                <Select
-                                    class='rounded-none border-black focus:ring-black focus:border-black border  font-normal bg-white  block w-full dark:bg-black dark:border-white dark:text-white'
+                    <select
+                      id="language"
                                     value={lang}
                                     onChange={(e) => {
                                         if (!paidMember) {
-                                            
                                             showPaidToast();
-                                        }else{
+                        } else {
                                             setLang(e.target.value);
                                         }
-                                    }}>
+                      }}
+                      className="block w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                      disabled={!paidMember}
+                    >
                                     {languages.map((country) => (
                                         <option key={country.code} value={country.name}>
                                             {country.name}
                                         </option>
                                     ))}
-                                </Select>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
                             </div>
-
-                            <Button isProcessing={processing} processingSpinner={<AiOutlineLoading className="h-6 w-6 animate-spin" />} className='items-center justify-center text-center dark:bg-white dark:text-black bg-black text-white font-bold rounded-none w-full enabled:hover:bg-black enabled:focus:bg-black enabled:focus:ring-transparent dark:enabled:hover:bg-white dark:enabled:focus:bg-white dark:enabled:focus:ring-transparent' type="submit">Submit</Button>
                         </div>
-
+                  {!paidMember && (
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Language selection is available for Pro members only
+                    </p>
+                  )}
+                </motion.div>
+                
+                <motion.div variants={itemVariants}>
+                  <button
+                    type="submit"
+                    disabled={processing}
+                    className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    {processing ? (
+                      <>
+                        <FiLoader className="animate-spin" />
+                        Generating Course...
+                      </>
+                    ) : (
+                      'Create Course'
+                    )}
+                  </button>
+                </motion.div>
                     </form>
-                </div>
             </div>
+          </motion.div>
+          
+          {/* Decorative elements */}
+          <motion.div 
+            className="absolute top-40 right-10 w-32 h-32 rounded-full bg-blue-400/5 dark:bg-blue-500/5 hidden md:block"
+            animate={{ 
+              y: [0, -15, 0],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ repeat: Infinity, duration: 8 }}
+          />
+          
+          <motion.div 
+            className="absolute bottom-20 left-10 w-24 h-24 rounded-full bg-purple-400/5 dark:bg-purple-500/5 hidden md:block"
+            animate={{ 
+              y: [0, 15, 0],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ repeat: Infinity, duration: 9, delay: 1 }}
+          />
+        </div>
+      </main>
 
             <Footers className="sticky bottom-0 z-50" />
         </div>

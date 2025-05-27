@@ -1,0 +1,105 @@
+/* Policy Content Styling */
+.policy-content {
+  line-height: 1.8;
+}
+
+.policy-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #1e40af; /* blue-800 */
+}
+
+.policy-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #2563eb; /* blue-600 */
+}
+
+.policy-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.policy-content p {
+  margin-bottom: 1rem;
+}
+
+.policy-content ul, .policy-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.policy-content ul {
+  list-style-type: disc;
+}
+
+.policy-content ol {
+  list-style-type: decimal;
+}
+
+.policy-content li {
+  margin-bottom: 0.5rem;
+}
+
+.policy-content a {
+  color: #2563eb; /* blue-600 */
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.policy-content a:hover {
+  text-decoration: underline;
+}
+
+.policy-content strong, .policy-content b {
+  font-weight: 600;
+}
+
+.policy-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.policy-content table th {
+  background-color: #f3f4f6; /* gray-100 */
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb; /* gray-200 */
+}
+
+.policy-content table td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb; /* gray-200 */
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .policy-content h1 {
+    color: #60a5fa; /* blue-400 */
+  }
+  
+  .policy-content h2 {
+    color: #93c5fd; /* blue-300 */
+  }
+  
+  .policy-content a {
+    color: #60a5fa; /* blue-400 */
+  }
+  
+  .policy-content table th {
+    background-color: #374151; /* gray-700 */
+    border: 1px solid #4b5563; /* gray-600 */
+  }
+  
+  .policy-content table td {
+    border: 1px solid #4b5563; /* gray-600 */
+  }
+} 

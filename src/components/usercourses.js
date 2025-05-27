@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { serverURL } from '../constants';
-import { Card, Spinner } from 'flowbite-react';
 import { useNavigate } from 'react-router-dom';
 import found from '../res/img/found.svg';
+import { FiArrowRight, FiAward, FiClock, FiCalendar, FiVideo, FiImage, FiPlus } from 'react-icons/fi';
 
 const UserCourses = ({ userId }) => {
     const [courses, setCourses] = useState([]);
@@ -52,17 +53,18 @@ const UserCourses = ({ userId }) => {
     const redirectGenerate = () => navigate("/create");
 
     const handleCourse = async (content, mainTopic, type, courseId, completed, end) => {
-
+        try {
         const postURL = serverURL + '/api/getmyresult';
         const response = await axios.post(postURL, { courseId });
-        console.log(response.data.lang)
-        if (response.data.success) {
+            
             const jsonData = JSON.parse(content);
             sessionStorage.setItem('courseId', courseId);
             sessionStorage.setItem('first', completed);
             sessionStorage.setItem('jsonData', JSON.stringify(jsonData));
+            
             let ending = '';
             if (completed) ending = end;
+            
             navigate('/course', {
                 state: {
                     jsonData,
@@ -70,26 +72,22 @@ const UserCourses = ({ userId }) => {
                     type: type.toLowerCase(),
                     courseId,
                     end: ending,
-                    pass: response.data.message,
+                    pass: response.data.success ? response.data.message : false,
                     lang: response.data.lang
                 }
             });
-        }else{
+        } catch (error) {
+            console.error("Error handling course:", error);
             const jsonData = JSON.parse(content);
-            sessionStorage.setItem('courseId', courseId);
-            sessionStorage.setItem('first', completed);
-            sessionStorage.setItem('jsonData', JSON.stringify(jsonData));
-            let ending = '';
-            if (completed) ending = end;
             navigate('/course', {
                 state: {
                     jsonData,
                     mainTopic: mainTopic.toUpperCase(),
                     type: type.toLowerCase(),
                     courseId,
-                    end: ending,
+                    end: completed ? end : '',
                     pass: false,
-                    lang: response.data.lang
+                    lang: 'en'
                 }
             });
         }
@@ -100,74 +98,220 @@ const UserCourses = ({ userId }) => {
         navigate('/certificate', { state: { courseTitle: mainTopic, end: ending } });
     };
 
-    const style = {
-        "root": {
-            "base": "flex flex-col rounded-none border border-black bg-white shadow-none dark:border-white dark:bg-black mx-2 my-4",
-            "children": "flex h-full flex-col justify-center gap-3 p-5",
-            "horizontal": {
-                "off": "flex-col",
-                "on": "flex-col md:flex-row"
-            },
-            "href": "hover:bg-white dark:hover:bg-black"
+    // Animation variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0.5 }
+        }
+    };
+
+    // Empty state animations
+    const emptyStateVariants = {
+        hidden: { opacity: 0, scale: 0.9 },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            transition: { duration: 0.6 }
+        }
+    };
+
+    // Loading animation for the dots
+    const loadingDotVariants = {
+        start: {
+            y: 0
         },
-        "img": {
-            "base": "",
-            "horizontal": {
-                "off": "rounded-none",
-                "on": "h-96 w-full rounded-none object-cover md:h-auto md:w-48 md:rounded-none md:rounded-l-lg"
+        end: {
+            y: [0, -10, 0],
+            transition: {
+                repeat: Infinity,
+                duration: 0.6
             }
         }
     };
 
     return (
-        <div className='my-4'>
+        <div>
             {processing ? (
-                <div className="text-center h-screen w-screen flex items-center justify-center">
-                    <Spinner size="xl" className='fill-black dark:fill-white' />
+                <motion.div
+                    className="flex flex-col items-center justify-center py-16"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <div className="flex space-x-2 mb-4">
+                        {[0, 1, 2].map((i) => (
+                            <motion.div
+                                key={i}
+                                className="w-4 h-4 rounded-full bg-blue-600 dark:bg-blue-400"
+                                variants={loadingDotVariants}
+                                initial="start"
+                                animate="end"
+                                transition={{ delay: i * 0.15 }}
+                            />
+                        ))}
                 </div>
+                    <p className="text-gray-600 dark:text-gray-300">Loading your courses...</p>
+                </motion.div>
             ) : (
                 <>
                     {courses.length === 0 ? (
-                        <div className="text-center h-center flex flex-col items-center justify-center">
-                            <img alt='img' src={found} className='max-w-sm h-3/6' />
-                            <p className='text-black font-black dark:text-white text-xl'>Nothing Found</p>
-                            <button onClick={redirectGenerate} className='bg-black text-white px-5 py-2 mt-4 font-medium dark:bg-white dark:text-black'>
-                                Generate Course
-                            </button>
+                        <motion.div 
+                            className="flex flex-col items-center justify-center py-12 text-center"
+                            variants={emptyStateVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            <div className="relative mb-8">
+                                <div className="absolute inset-0 bg-blue-400/10 dark:bg-blue-600/10 rounded-full blur-xl transform -translate-y-4"></div>
+                                <img alt="No courses found" src={found} className="relative z-10 max-w-xs h-60" />
                         </div>
+                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Courses Found</h3>
+                            <p className="text-gray-600 dark:text-gray-300 max-w-md mb-8">
+                                You haven't created any courses yet. Start your learning journey by creating your first AI-generated course.
+                            </p>
+                            <motion.button 
+                                onClick={redirectGenerate} 
+                                className="flex items-center gap-2 py-3 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/20 dark:shadow-blue-900/30 transition-all"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <FiPlus className="text-lg" />
+                                Create Your First Course
+                            </motion.button>
+                        </motion.div>
                     ) : (
-                        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
-                            {courses.map((course) => (
-                                <div key={course._id} className='w-full'>
-                                    <Card theme={style} imgSrc={course.photo}>
-                                        <h5 className='text-xl font-black tracking-tight text-black dark:text-white' style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <motion.div 
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            {courses.map((course, index) => (
+                                <motion.div 
+                                    key={course._id} 
+                                    className="w-full"
+                                    variants={itemVariants}
+                                    layout
+                                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                                >
+                                    <div className="group h-full flex flex-col overflow-hidden bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300">
+                                        <div className="relative overflow-hidden">
+                                            {/* Course type badge */}
+                                            <div className="absolute top-4 left-4 z-10 bg-blue-600/90 dark:bg-blue-500/90 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                                                {course.type.toLowerCase().includes('video') ? (
+                                                    <FiVideo className="text-xs" />
+                                                ) : (
+                                                    <FiImage className="text-xs" />
+                                                )}
+                                                <span className="capitalize">{course.type}</span>
+                                            </div>
+                                            
+                                            {/* Completed badge */}
+                                            {course.completed && (
+                                                <div className="absolute top-4 right-4 z-10 bg-green-600/90 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                                                    <FiAward className="text-xs" />
+                                                    Completed
+                                                </div>
+                                            )}
+                                            
+                                            {/* Course image with overlay */}
+                                            <div className="relative h-48 overflow-hidden">
+                                                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-gray-900/10 z-10"></div>
+                                                <img 
+                                                    src={course.photo} 
+                                                    alt={course.mainTopic}
+                                                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" 
+                                                />
+                                                
+                                                {/* Course title on the image */}
+                                                <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                                                    <h3 className="text-xl font-bold text-white line-clamp-2">
                                             {course.mainTopic.toUpperCase()}
-                                        </h5>
-                                        <p className='font-normal text-sm capitalize text-black dark:text-white'>
-                                            {course.type}
-                                        </p>
-                                        <p className='font-normal text-sm text-black dark:text-white'>
-                                            {new Date(course.date).toLocaleDateString()}
-                                        </p>
-                                        <div className='flex-row flex space-x-4'>
-                                            <button onClick={() => handleCourse(course.content, course.mainTopic, course.type, course._id, course.completed, course.end)} className='bg-black text-white px-5 py-2 font-medium dark:bg-white dark:text-black'>
-                                                Continue
-                                            </button>
-                                            {course.completed ? (
-                                                <button onClick={() => handleCertificate(course.mainTopic, course.end)} className='border-black text-black border px-5 py-2 font-medium dark:border-white dark:text-white'>
-                                                    Certificate
-                                                </button>
-                                            ) : null}
+                                                    </h3>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </Card>
+                                        
+                                        <div className="flex-1 p-5 flex flex-col">
+                                            {/* Course metadata */}
+                                            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                                <div className="flex items-center gap-1">
+                                                    <FiCalendar className="text-blue-600 dark:text-blue-400" />
+                                                    <span>{new Date(course.date).toLocaleDateString()}</span>
+                                                </div>
+                                                {course.completed && (
+                                                    <div className="flex items-center gap-1">
+                                                        <FiClock className="text-blue-600 dark:text-blue-400" />
+                                                        <span>Completed: {new Date(course.end).toLocaleDateString()}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            {/* Actions */}
+                                            <div className="mt-auto flex flex-col sm:flex-row gap-3">
+                                                <motion.button 
+                                                    onClick={() => handleCourse(course.content, course.mainTopic, course.type, course._id, course.completed, course.end)} 
+                                                    className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium transition-colors"
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                >
+                                                Continue
+                                                    <FiArrowRight />
+                                                </motion.button>
+                                                
+                                                {course.completed && (
+                                                    <motion.button 
+                                                        onClick={() => handleCertificate(course.mainTopic, course.end)} 
+                                                        className="flex-1 flex items-center justify-center gap-2 py-2 px-4 border border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg font-medium transition-colors"
+                                                        whileHover={{ scale: 1.02 }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                    >
+                                                        <FiAward />
+                                                    Certificate
+                                                    </motion.button>
+                                                )}
+                                            </div>
+                                        </div>
                                 </div>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     )}
+                    
                     {loadingMore && (
-                        <div className="text-center my-4">
-                            <Spinner size="lg" className='fill-black dark:fill-white' />
+                        <motion.div 
+                            className="flex justify-center my-8"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <div className="flex space-x-2">
+                                {[0, 1, 2].map((i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-400"
+                                        variants={loadingDotVariants}
+                                        initial="start"
+                                        animate="end"
+                                        transition={{ delay: i * 0.15 }}
+                                    />
+                                ))}
                         </div>
+                        </motion.div>
                     )}
                 </>
             )}

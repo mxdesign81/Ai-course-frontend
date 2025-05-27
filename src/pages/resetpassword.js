@@ -1,40 +1,86 @@
 import React, { useEffect, useState } from 'react';
-import img from '../../src/res/img/reset.svg';
-import { Flowbite, Navbar } from 'flowbite-react';
-import { Button, Label } from 'flowbite-react';
+import { motion } from 'framer-motion';
 import { name, serverURL, websiteURL, company, logo } from '../constants';
 import DarkModeToggle from '../components/DarkModeToggle';
 import LogoComponent from '../components/LogoComponent';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { AiOutlineLoading } from 'react-icons/ai';
+import { FiLock, FiArrowRight, FiShield, FiCheck, FiX } from 'react-icons/fi';
+import { FaSpinner } from 'react-icons/fa';
 
 const ResetPassword = () => {
-
     const storedTheme = sessionStorage.getItem('darkMode');
     const [password, setPassword] = useState('');
     const [confirmpassword, setConfirmPassword] = useState('');
     const [processing, setProcessing] = useState(false);
+  const [formFocus, setFormFocus] = useState({
+    password: false,
+    confirmPassword: false
+  });
 
     const navigate = useNavigate();
     const { token } = useParams();
 
-    function redirectSignIn() {
-        navigate("/signin");
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
     }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+  
+  const buttonVariants = {
+    rest: { scale: 1 },
+    hover: { scale: 1.02 },
+    tap: { scale: 0.98 }
+  };
 
-    function redirectHome() {
-        navigate("/home");
+  // Password strength indicator
+  const getPasswordStrength = () => {
+    if (!password) return { width: '0%', color: 'bg-gray-200' };
+    
+    if (password.length < 6) {
+      return { width: '30%', color: 'bg-red-500' };
+    } else if (password.length < 9) {
+      return { width: '60%', color: 'bg-yellow-500' };
+    } else {
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      
+      if (hasNumber && hasSpecial) {
+        return { width: '100%', color: 'bg-green-500' };
+      } else {
+        return { width: '80%', color: 'bg-blue-500' };
+      }
     }
+  };
+  
+  // Password match validation
+  const passwordsMatch = password && confirmpassword && password === confirmpassword;
+  const showPasswordMatchFeedback = password && confirmpassword;
 
     useEffect(() => {
-
         if (sessionStorage.getItem('auth')) {
             redirectHome();
         }
-
     }, []);
+
+  const redirectSignIn = () => navigate("/signin");
+  const redirectHome = () => navigate("/home");
 
     const showToast = async (msg) => {
         setProcessing(false);
@@ -47,7 +93,7 @@ const ResetPassword = () => {
             draggable: true,
             progress: undefined
         });
-    }
+  };
 
     const handleReset = async (e) => {
         e.preventDefault();
@@ -125,60 +171,278 @@ const ResetPassword = () => {
             }).catch(error => {
                 redirectSignIn();
             });
-
         } catch (error) {
             redirectSignIn();
         }
-
     }
 
     return (
-        <Flowbite>
-            <div className="flex h-screen dark:bg-black no-scrollbar">
-
-                <div className="flex-1 overflow-y-auto no-scrollbar">
-
-                    <Navbar fluid className='p-8 dark:bg-black'>
-                        <Navbar.Brand href={websiteURL} className="ml-1">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black overflow-hidden">
+      {/* Header */}
+      <header className="w-full p-4 md:p-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <motion.a 
+            href={websiteURL}
+            className="flex items-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
                             <LogoComponent isDarkMode={storedTheme} />
-                            <span className="self-center whitespace-nowrap text-2xl font-black dark:text-white ">{name}</span>
-                        </Navbar.Brand>
+            <span className="ml-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+              {name}
+            </span>
+          </motion.a>
                         <DarkModeToggle />
-                    </Navbar>
+        </div>
+      </header>
 
-                    <form onSubmit={handleReset} className="max-w-sm m-auto py-9 no-scrollbar">
+      {/* Content */}
+      <motion.div 
+        className="flex flex-1 w-full"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {/* Form Side */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-4 md:px-8 py-8">
+          <motion.div 
+            className="w-full max-w-md mx-auto"
+            variants={containerVariants}
+          >
+            <motion.h1 
+              className="text-4xl md:text-5xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400"
+              variants={itemVariants}
+            >
+              Reset Password
+            </motion.h1>
+            
+            <motion.p 
+              className="text-gray-600 dark:text-gray-300 text-center mb-8"
+              variants={itemVariants}
+            >
+              Create a new secure password for your account
+            </motion.p>
 
-                        <h1 className='text-center font-black text-5xl text-black dark:text-white'>Reset Password</h1>
-                        <p className='text-center font-normal text-black py-4 dark:text-white'>Enter your new password</p>
-
-                        <div className='py-10'>
-                            <div className='mb-4'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="password1" value="Password" />
+            <motion.form 
+              onSubmit={handleReset}
+              className="space-y-6"
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants}>
+                <div className="relative">
+                  <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-all ${formFocus.password ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
+                    <FiLock />
                                 </div>
-                                <input onChange={(e) => setPassword(e.target.value)} className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white' id="password1" type="password" />
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFormFocus({...formFocus, password: true})}
+                    onBlur={() => setFormFocus({...formFocus, password: false})}
+                    placeholder="New password (min. 9 characters)"
+                    className="w-full px-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white transition-all"
+                    required
+                  />
                             </div>
-                            <div className='mb-4'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="password2" value="Confirm Password" />
+                
+                {/* Password strength indicator */}
+                {password && (
+                  <div className="mt-2">
+                    <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <motion.div 
+                        className={`h-full ${getPasswordStrength().color}`}
+                        initial={{ width: "0%" }}
+                        animate={{ width: getPasswordStrength().width }}
+                        transition={{ duration: 0.3 }}
+                      />
                                 </div>
-                                <input onChange={(e) => setConfirmPassword(e.target.value)} className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white' id="password2" type="password" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {password.length < 9 
+                        ? "Password must be at least 9 characters" 
+                        : "Strong passwords include numbers and special characters"}
+                    </p>
                             </div>
-                            <Button isProcessing={processing} processingSpinner={<AiOutlineLoading className="h-6 w-6 animate-spin" />} className='items-center justify-center text-center dark:bg-white dark:text-black bg-black text-white font-bold rounded-none w-full enabled:hover:bg-black enabled:focus:bg-black enabled:focus:ring-transparent dark:enabled:hover:bg-white dark:enabled:focus:bg-white dark:enabled:focus:ring-transparent' type="submit">Submit</Button>
+                )}
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <div className="relative">
+                  <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-all ${formFocus.confirmPassword ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
+                    <FiLock />
                         </div>
-
-                    </form>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    value={confirmpassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onFocus={() => setFormFocus({...formFocus, confirmPassword: true})}
+                    onBlur={() => setFormFocus({...formFocus, confirmPassword: false})}
+                    placeholder="Confirm new password"
+                    className={`w-full px-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white transition-all ${
+                      showPasswordMatchFeedback 
+                        ? passwordsMatch 
+                          ? 'border-green-500 dark:border-green-500' 
+                          : 'border-red-500 dark:border-red-500'
+                        : ''
+                    }`}
+                    required
+                  />
+                  
+                  {showPasswordMatchFeedback && (
+                    <div className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                      passwordsMatch ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {passwordsMatch ? <FiCheck /> : <FiX />}
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50 dark:bg-white">
-                    <img
-                        src={img}
-                        className="h-full bg-cover bg-center p-9"
-                        alt="Background"
-                    />
+                {showPasswordMatchFeedback && !passwordsMatch && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Passwords do not match
+                  </p>
+                )}
+              </motion.div>
+              
+              <motion.button
+                type="submit"
+                disabled={processing}
+                variants={buttonVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/20 dark:shadow-blue-900/30 flex items-center justify-center transition-all"
+              >
+                {processing ? (
+                  <FaSpinner className="animate-spin mr-2" />
+                ) : (
+                  <FiArrowRight className="mr-2" />
+                )}
+                {processing ? 'Updating Password...' : 'Reset Password'}
+              </motion.button>
+              
+              <motion.div 
+                className="text-center mt-6"
+                variants={itemVariants}
+              >
+                <p className="text-gray-600 dark:text-gray-400">
+                  Remember your password?{' '}
+                  <button
+                    type="button"
+                    onClick={redirectSignIn}
+                    className="text-blue-600 dark:text-blue-400 font-medium hover:underline focus:outline-none"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </motion.div>
+            </motion.form>
+          </motion.div>
+        </div>
+        
+        {/* Illustration Side */}
+        <div className="hidden lg:flex lg:w-1/2 bg-purple-50 dark:bg-gray-800 items-center justify-center relative overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-blue-400/20 dark:from-purple-500/10 dark:to-blue-500/10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5 }}
+          />
+          
+          <motion.div
+            className="relative z-10 max-w-lg px-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="w-24 h-24 mx-auto mb-6 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center shadow-lg"
+              >
+                <FiShield className="text-4xl text-purple-600 dark:text-purple-400" />
+              </motion.div>
+              
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Create a Secure Password
+              </h2>
+              
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
+                Strong passwords help protect your account and personal information.
+              </p>
+              
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Use at least 9 characters",
+                    description: "Longer passwords are harder to crack",
+                    icon: <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                  },
+                  {
+                    title: "Mix characters and numbers",
+                    description: "Include uppercase, lowercase, numbers, and symbols",
+                    icon: <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                  },
+                  {
+                    title: "Don't reuse passwords",
+                    description: "Use unique passwords for different accounts",
+                    icon: <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                  }
+                ].map((tip, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex items-start bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 + (index * 0.1), duration: 0.5 }}
+                  >
+                    <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-3 flex-shrink-0">
+                      {tip.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        {tip.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {tip.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
                 </div>
             </div>
-        </Flowbite>
+          </motion.div>
+          
+          {/* Animated Shapes */}
+          <motion.div
+            className="absolute top-10 right-10 w-24 h-24 rounded-full bg-purple-400/20 dark:bg-purple-500/20"
+            animate={{ 
+              y: [0, -15, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ repeat: Infinity, duration: 5 }}
+          />
+          
+          <motion.div
+            className="absolute bottom-10 left-10 w-32 h-32 rounded-full bg-blue-400/20 dark:bg-blue-500/20"
+            animate={{ 
+              y: [0, 15, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ repeat: Infinity, duration: 6, delay: 1 }}
+          />
+        </div>
+      </motion.div>
+    </div>
     );
 };
 

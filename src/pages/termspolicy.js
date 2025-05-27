@@ -1,39 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../components/header';
-import Footers from '../components/footers';
 import { serverURL } from '../constants';
 import axios from 'axios';
-import StyledText from '../components/styledText';
+import PolicyLayout from '../components/PolicyLayout';
 
 const TermsPolicy = () => {
-
     const [data, setData] = useState('');
+  const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        async function dashboardData() {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        if (sessionStorage.getItem('TermsPolicy')) {
+          setData(sessionStorage.getItem('TermsPolicy'));
+        } else {
             const postURL = serverURL + `/api/policies`;
             const response = await axios.get(postURL);
-            setData(response.data[0].terms)
+          const termsData = response.data[0].terms;
+          setData(termsData);
+          sessionStorage.setItem('TermsPolicy', termsData);
         }
-        if (sessionStorage.getItem('TermsPolicy') === null && sessionStorage.getItem('PrivacyPolicy') === null) {
-            dashboardData();
-        } else {
-            setData(sessionStorage.getItem('TermsPolicy'))
-        }
+      } catch (error) {
+        console.error('Error fetching terms policy:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
     }, []);
 
-    return (
-        <div className='h-screen flex flex-col'>
-            <Header isHome={false} className="sticky top-0 z-50" />
-            <div className='dark:bg-black flex-1'>
-                <div className='flex-1 flex items-center justify-center py-10 flex-col'>
-                    <p className='text-center font-black text-4xl text-black dark:text-white'>Terms</p>
-                    <div className='w-4/5 py-20'><StyledText text={data} /></div>
-                </div>
-            </div>
-            <Footers className="sticky bottom-0 z-50" />
-        </div>
-    );
+  return <PolicyLayout title="Terms of Service" content={data} isLoading={loading} />;
 };
 
 export default TermsPolicy;

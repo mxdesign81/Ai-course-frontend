@@ -1,42 +1,86 @@
 import React, { useEffect, useState } from 'react';
-import img from '../../src/res/img/signup.svg';
-import { Flowbite, Navbar } from 'flowbite-react';
-import { Button, Label } from 'flowbite-react';
+import { motion } from 'framer-motion';
 import { company, logo, name, serverURL, websiteURL, facebookClientId } from '../constants';
 import DarkModeToggle from '../components/DarkModeToggle';
 import LogoComponent from '../components/LogoComponent';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { AiOutlineLoading } from 'react-icons/ai';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import FacebookLogin from '@greatsumini/react-facebook-login';
+import { FiMail, FiLock, FiArrowRight, FiUser, FiShield, FiBookOpen } from 'react-icons/fi';
+import { FaSpinner } from 'react-icons/fa';
 
 const SignUp = () => {
-
     const storedTheme = sessionStorage.getItem('darkMode');
     const [mName, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [processing, setProcessing] = useState(false);
+  const [formFocus, setFormFocus] = useState({
+    name: false,
+    email: false,
+    password: false
+  });
 
     const navigate = useNavigate();
-    function redirectSignIn() {
-        navigate("/signin");
+  
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
     }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+  
+  const buttonVariants = {
+    rest: { scale: 1 },
+    hover: { scale: 1.02 },
+    tap: { scale: 0.98 }
+  };
 
-    function redirectHome() {
-        navigate("/home");
+  // Password strength indicator
+  const getPasswordStrength = () => {
+    if (!password) return { width: '0%', color: 'bg-gray-200' };
+    
+    if (password.length < 6) {
+      return { width: '30%', color: 'bg-red-500' };
+    } else if (password.length < 9) {
+      return { width: '60%', color: 'bg-yellow-500' };
+    } else {
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      
+      if (hasNumber && hasSpecial) {
+        return { width: '100%', color: 'bg-green-500' };
+      } else {
+        return { width: '80%', color: 'bg-blue-500' };
+      }
     }
+  };
 
     useEffect(() => {
-
         if (sessionStorage.getItem('auth')) {
             redirectHome();
         }
-
     }, []);
+
+  const redirectSignIn = () => navigate("/signin");
+  const redirectHome = () => navigate("/home");
 
     const showToast = async (msg) => {
         setProcessing(false);
@@ -49,7 +93,7 @@ const SignUp = () => {
             draggable: true,
             progress: undefined
         });
-    }
+  };
 
     const handleSignup = async (e) => {
         e.preventDefault();
@@ -82,7 +126,6 @@ const SignUp = () => {
     };
 
     async function sendEmail(mEmail, mName) {
-
         try {
             const dataToSend = {
                 subject: `Welcome to ${name}`,
@@ -92,7 +135,7 @@ const SignUp = () => {
                 <html lang="en">
                 
                   <head></head>
-                 <div id="__react-email-preview" style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">Welcome to Coursea<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div>
+         <div id="__react-email-preview" style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">Welcome to Coursea<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div>
                  </div>
                 
                   <body style="margin-left:auto;margin-right:auto;margin-top:auto;margin-bottom:auto;background-color:rgb(255,255,255);font-family:ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, &quot;Noto Sans&quot;, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;, &quot;Noto Color Emoji&quot;">
@@ -130,57 +173,196 @@ const SignUp = () => {
             }).catch(error => {
                 redirectHome();
             });
-
         } catch (error) {
             redirectHome();
         }
-
     }
 
     return (
-        <Flowbite>
-            <div className="flex h-screen dark:bg-black no-scrollbar">
-
-                <div className="flex-1 overflow-y-auto no-scrollbar">
-
-                    <Navbar fluid className='p-8 dark:bg-black'>
-                        <Navbar.Brand href={websiteURL} className="ml-1">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black overflow-hidden">
+      {/* Header */}
+      <header className="w-full p-4 md:p-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <motion.a 
+            href={websiteURL}
+            className="flex items-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
                             <LogoComponent isDarkMode={storedTheme} />
-                            <span className="self-center whitespace-nowrap text-2xl font-black dark:text-white ">{name}</span>
-                        </Navbar.Brand>
+            <span className="ml-2 text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+              {name}
+            </span>
+          </motion.a>
                         <DarkModeToggle />
-                    </Navbar>
+        </div>
+      </header>
 
-                    <form onSubmit={handleSignup} className="max-w-sm m-auto py-4 no-scrollbar">
-
-                        <h1 className='text-center font-black text-5xl text-black dark:text-white'>SignUp</h1>
-                        <p className='text-center font-normal text-black py-4 dark:text-white'>Enter email & password to continue</p>
-
-                        <div className='py-6'>
-                            <div className='mb-6'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="name1" value="Name" />
+      {/* Content */}
+      <motion.div 
+        className="flex flex-1 w-full"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {/* Form Side */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-4 md:px-8 py-8">
+          <motion.div 
+            className="w-full max-w-md mx-auto"
+            variants={containerVariants}
+          >
+            <motion.h1 
+              className="text-4xl md:text-5xl font-bold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400"
+              variants={itemVariants}
+            >
+              Create Account
+            </motion.h1>
+            
+            <motion.p 
+              className="text-gray-600 dark:text-gray-300 text-center mb-8"
+              variants={itemVariants}
+            >
+              Join today and start generating AI courses
+            </motion.p>
+            
+            <motion.form 
+              onSubmit={handleSignup}
+              className="space-y-6"
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants}>
+                <div className="relative">
+                  <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-all ${formFocus.name ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
+                    <FiUser />
+                  </div>
+                  <input
+                    type="text"
+                    id="name"
+                    value={mName}
+                    onChange={(e) => setName(e.target.value)}
+                    onFocus={() => setFormFocus({...formFocus, name: true})}
+                    onBlur={() => setFormFocus({...formFocus, name: false})}
+                    placeholder="Full name"
+                    className="w-full px-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white transition-all"
+                    required
+                  />
+                </div>
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <div className="relative">
+                  <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-all ${formFocus.email ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
+                    <FiMail />
+                  </div>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setFormFocus({...formFocus, email: true})}
+                    onBlur={() => setFormFocus({...formFocus, email: false})}
+                    placeholder="Email address"
+                    className="w-full px-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white transition-all"
+                    required
+                  />
+                </div>
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <div className="relative">
+                  <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-all ${formFocus.password ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'}`}>
+                    <FiLock />
+                  </div>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFormFocus({...formFocus, password: true})}
+                    onBlur={() => setFormFocus({...formFocus, password: false})}
+                    placeholder="Password (min. 9 characters)"
+                    className="w-full px-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-gray-900 dark:text-white transition-all"
+                    required
+                  />
                                 </div>
-                                <input value={mName} onChange={(e) => setName(e.target.value)} className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white' id="name1" type="text" />
+                
+                {/* Password strength indicator */}
+                {password && (
+                  <div className="mt-2">
+                    <div className="h-1 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <motion.div 
+                        className={`h-full ${getPasswordStrength().color}`}
+                        initial={{ width: "0%" }}
+                        animate={{ width: getPasswordStrength().width }}
+                        transition={{ duration: 0.3 }}
+                      />
                             </div>
-                            <div className='mb-6'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="email1" value="Email" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {password.length < 9 
+                        ? "Password must be at least 9 characters" 
+                        : "Strong passwords include numbers and special characters"}
+                    </p>
                                 </div>
-                                <input value={email} onChange={(e) => setEmail(e.target.value)} className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white' id="email1" type="email" />
+                )}
+              </motion.div>
+              
+              <motion.button
+                type="submit"
+                disabled={processing}
+                variants={buttonVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/20 dark:shadow-blue-900/30 flex items-center justify-center transition-all"
+              >
+                {processing ? (
+                  <FaSpinner className="animate-spin mr-2" />
+                ) : (
+                  <FiArrowRight className="mr-2" />
+                )}
+                {processing ? 'Creating account...' : 'Create Account'}
+              </motion.button>
+              
+              <motion.div 
+                className="text-center mt-6"
+                variants={itemVariants}
+              >
+                <p className="text-gray-600 dark:text-gray-400">
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    onClick={redirectSignIn}
+                    className="text-blue-600 dark:text-blue-400 font-medium hover:underline focus:outline-none"
+                  >
+                    Sign in
+                  </button>
+                </p>
+              </motion.div>
+            </motion.form>
+            
+            <motion.div 
+              className="mt-8"
+              variants={itemVariants}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
                             </div>
-                            <div className='mb-14'>
-                                <div className="mb-2 block">
-                                    <Label className="font-bold text-black dark:text-white" htmlFor="password1" value="Password" />
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black text-gray-500 dark:text-gray-400">
+                    Or continue with
+                  </span>
                                 </div>
-                                <input value={password} onChange={(e) => setPassword(e.target.value)} className='focus:ring-black focus:border-black border border-black font-normal bg-white rounded-none block w-full dark:bg-black dark:border-white dark:text-white' id="password1" type="password" />
                             </div>
-                            <Button isProcessing={processing} processingSpinner={<AiOutlineLoading className="h-6 w-6 animate-spin" />} className='items-center justify-center text-center dark:bg-white dark:text-black bg-black text-white font-bold rounded-none w-full enabled:hover:bg-black enabled:focus:bg-black enabled:focus:ring-transparent dark:enabled:hover:bg-white dark:enabled:focus:bg-white dark:enabled:focus:ring-transparent' type="submit">Submit</Button>
-                            <p onClick={redirectSignIn} className='text-center font-normal text-black underline py-4  dark:text-white'>Already have an account ? SignIn</p>
+              
+              <div className="mt-6 space-y-4">
+                <div className="w-full">
                             <GoogleLogin
-                                theme='outline'
-                                type='standard'
-                                width={400}
+                    theme={storedTheme === 'true' ? 'filled_black' : 'outline'}
+                    size="large"
+                    shape="rectangular"
+                    width="100%"
+                    text="signup_with"
                                 onSuccess={async (credentialResponse) => {
                                     const decoded = jwtDecode(credentialResponse.credential);
                                     let email = decoded.email;
@@ -203,27 +385,31 @@ const SignUp = () => {
                                     } catch (error) {
                                         showToast('Internal Server Error');
                                     }
-
                                 }}
                                 onError={() => {
-                                    showToast('Internal Server Error');
+                      showToast('Google Sign-up Failed');
                                 }}
                             />
+                </div>
 
+                <div className="w-full">
                             <FacebookLogin
                                 appId={facebookClientId}
                                 style={{
                                     backgroundColor: '#4267b2',
                                     color: '#fff',
-                                    fontSize: '15px',
-                                    padding: '8px 24px',
-                                    width: '104%',
+                      fontSize: '14px',
+                      padding: '12px 24px',
+                      width: '100%',
                                     border: 'none',
-                                    marginTop: '16px',
-                                    borderRadius: '0px',
+                      borderRadius: '8px',
+                      fontWeight: '500',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                                 }}
                                 onFail={(error) => {
-                                    showToast('Internal Server Error');
+                      showToast('Facebook Sign-up Failed');
                                 }}
                                 onProfileSuccess={async (response) => {
                                     let email = response.email;
@@ -234,12 +420,12 @@ const SignUp = () => {
                                         const response = await axios.post(postURL, { email, name });
                                         if (response.data.success) {
                                             showToast(response.data.message);
-                                            sessionStorage.setItem('email', response.email);
-                                            sessionStorage.setItem('mName', response.name);
+                          sessionStorage.setItem('email', email);
+                          sessionStorage.setItem('mName', name);
                                             sessionStorage.setItem('auth', true);
                                             sessionStorage.setItem('uid', response.data.userData._id);
                                             sessionStorage.setItem('type', response.data.userData.type);
-                                            sendEmail(response.email, response.name);
+                          sendEmail(email, name);
                                         } else {
                                             showToast(response.data.message);
                                         }
@@ -248,22 +434,113 @@ const SignUp = () => {
                                     }
                                 }}
                             />
-
-
+                </div>
                         </div>
-
-                    </form>
+            </motion.div>
+          </motion.div>
                 </div>
 
-                <div className="flex-1 hidden lg:flex items-center justify-center bg-gray-50 dark:bg-white">
-                    <img
-                        alt='logo'
-                        src={img}
-                        className="h-full bg-cover bg-center p-9"
-                    />
+        {/* Image/Illustration Side */}
+        <div className="hidden lg:flex lg:w-1/2 bg-purple-50 dark:bg-gray-800 items-center justify-center relative overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-blue-400/20 dark:from-purple-500/10 dark:to-blue-500/10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5 }}
+          />
+          
+          <motion.div
+            className="relative z-10 max-w-lg px-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            <div className="text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="w-24 h-24 mx-auto mb-6 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center shadow-lg"
+              >
+                <FiBookOpen className="text-4xl text-purple-600 dark:text-purple-400" />
+              </motion.div>
+              
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Your AI Learning Journey Starts Here
+              </h2>
+              
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
+                Create a free account to unlock the power of AI-generated courses and personalized learning.
+              </p>
+              
+              {/* Benefits */}
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Free to Start",
+                    description: "Begin your learning journey with our free tier",
+                    icon: <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  },
+                  {
+                    title: "Personalized Learning",
+                    description: "Courses tailored to your specific needs",
+                    icon: <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  },
+                  {
+                    title: "Secure Account",
+                    description: "Your data is always protected and private",
+                    icon: <FiShield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  }
+                ].map((benefit, index) => (
+                  <motion.div
+                    key={index}
+                    className="flex items-start bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 + (index * 0.1), duration: 0.5 }}
+                  >
+                    <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-3 flex-shrink-0">
+                      {benefit.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        {benefit.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {benefit.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
                 </div>
             </div>
-        </Flowbite>
+          </motion.div>
+          
+          {/* Animated Shapes */}
+          <motion.div
+            className="absolute top-10 right-10 w-24 h-24 rounded-full bg-purple-400/20 dark:bg-purple-500/20"
+            animate={{ 
+              y: [0, -15, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ repeat: Infinity, duration: 5 }}
+          />
+          
+          <motion.div
+            className="absolute bottom-10 left-10 w-32 h-32 rounded-full bg-blue-400/20 dark:bg-blue-500/20"
+            animate={{ 
+              y: [0, 15, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ repeat: Infinity, duration: 6, delay: 1 }}
+          />
+        </div>
+      </motion.div>
+    </div>
     );
 };
 
