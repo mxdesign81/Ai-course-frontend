@@ -1,8 +1,8 @@
 //BRAND
-export const name = 'Coursea';
+export const name = 'coursgen';
 export const company = 'Coursegen';
-export const websiteURL = 'http://localhost:3000';
-export const serverURL = 'http://localhost:5001';
+export const websiteURL = 'https://lcoursgen.com';
+export const serverURL = 'https://ai-course-backend-sigma.vercel.app';
 export const logo = 'https://firebasestorage.googleapis.com/v0/b/india-bd34b.appspot.com/o/artificial-intelligence.png?alt=media&token=2dc0da1c-12d0-4dd2-b908-cb8e57fcf3f0';
 export const razorpayEnabled = true;
 export const paypalEnabled = true;

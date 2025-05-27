@@ -127,7 +127,7 @@ const Courses = () => {
     });
   };
 
-  const handleCourseAction = async (action, courseId, courseTitle) => {
+  const handlecoursgenction = async (action, courseId, courseTitle) => {
     try {
       // Placeholder for course actions - you can implement actual API calls here
       switch (action) {
@@ -238,7 +238,7 @@ const Courses = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <motion.button
-              onClick={() => handleCourseAction('view', course._id, course.mainTopic)}
+              onClick={() => handlecoursgenction('view', course._id, course.mainTopic)}
               className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -248,7 +248,7 @@ const Courses = () => {
             </motion.button>
             
             <motion.button
-              onClick={() => handleCourseAction('moderate', course._id, course.mainTopic)}
+              onClick={() => handlecoursgenction('moderate', course._id, course.mainTopic)}
               className="flex items-center gap-1 px-3 py-1.5 text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -278,28 +278,28 @@ const Courses = () => {
                 >
                   <div className="py-1">
                     <button
-                      onClick={() => handleCourseAction('edit', course._id, course.mainTopic)}
+                      onClick={() => handlecoursgenction('edit', course._id, course.mainTopic)}
                       className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <FiEdit3 className="w-4 h-4" />
                       <span>Edit Course</span>
                     </button>
                     <button
-                      onClick={() => handleCourseAction('approve', course._id, course.mainTopic)}
+                      onClick={() => handlecoursgenction('approve', course._id, course.mainTopic)}
                       className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-green-700 dark:text-green-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <FiCheckCircle className="w-4 h-4" />
                       <span>Approve</span>
                     </button>
                     <button
-                      onClick={() => handleCourseAction('reject', course._id, course.mainTopic)}
+                      onClick={() => handlecoursgenction('reject', course._id, course.mainTopic)}
                       className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-700 dark:text-red-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <FiAlertCircle className="w-4 h-4" />
                       <span>Reject</span>
                     </button>
                     <button
-                      onClick={() => handleCourseAction('delete', course._id, course.mainTopic)}
+                      onClick={() => handlecoursgenction('delete', course._id, course.mainTopic)}
                       className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-700 dark:text-red-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <FiTrash2 className="w-4 h-4" />
@@ -389,28 +389,28 @@ const Courses = () => {
               >
                 <div className="py-1">
                   <button
-                    onClick={() => handleCourseAction('view', course._id, course.mainTopic)}
+                    onClick={() => handlecoursgenction('view', course._id, course.mainTopic)}
                     className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <FiEye className="w-4 h-4" />
                     <span>View Course</span>
                   </button>
                   <button
-                    onClick={() => handleCourseAction('edit', course._id, course.mainTopic)}
+                    onClick={() => handlecoursgenction('edit', course._id, course.mainTopic)}
                     className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <FiEdit3 className="w-4 h-4" />
                     <span>Edit Course</span>
                   </button>
                   <button
-                    onClick={() => handleCourseAction('moderate', course._id, course.mainTopic)}
+                    onClick={() => handlecoursgenction('moderate', course._id, course.mainTopic)}
                     className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-orange-700 dark:text-orange-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <FiFlag className="w-4 h-4" />
                     <span>Moderate</span>
                   </button>
                   <button
-                    onClick={() => handleCourseAction('delete', course._id, course.mainTopic)}
+                    onClick={() => handlecoursgenction('delete', course._id, course.mainTopic)}
                     className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-700 dark:text-red-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <FiTrash2 className="w-4 h-4" />
