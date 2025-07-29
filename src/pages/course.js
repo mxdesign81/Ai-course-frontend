@@ -172,6 +172,30 @@ const Course = () => {
   };
 
     const handleSelect = (topics, sub) => {
+  const mTopic = jsonData[mainTopic.toLowerCase()].find(topic => topic.title === topics);
+  const mSubTopic = mTopic?.subtopics.find(subtopic => subtopic.title === sub);
+
+  if (mSubTopic.theory === '' || mSubTopic.theory === undefined || mSubTopic.theory === null) {
+    const id = toast.loading("Loading content...");
+    setProgress(7);
+
+    if (type === 'video & text course') {
+      const query = `${mSubTopic.title} ${mainTopic} in english`;
+      sendVideo(query, topics, sub, id, mSubTopic.title);
+    } else {
+      const prompt = `Strictly in ${lang}, Explain me about this subtopic of ${mainTopic} with examples :- ${mSubTopic.title}. Please Strictly Don't Give Additional Resources And Images.`;
+      const promptImage = `Example of ${mSubTopic.title} in ${mainTopic}`;
+      sendPrompt(prompt, promptImage, topics, sub, id);
+    }
+
+    setProgress(100);
+  } else {
+    setSelected(mSubTopic.title);
+    setTheory(mSubTopic.theory);
+    setMedia(type === 'video & text course' ? mSubTopic.youtube : mSubTopic.image);
+    setProgress(100);
+  }
+}
         const mTopic = jsonData[mainTopic.toLowerCase()].find(topic => topic.title === topics);
         const mSubTopic = mTopic?.subtopics.find(subtopic => subtopic.title === sub);
 
